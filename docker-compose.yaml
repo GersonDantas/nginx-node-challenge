@@ -1,0 +1,42 @@
+version: '3.7'
+
+services:
+  nginx: 
+    build: 
+      context: ./nginx
+    container_name: nginx
+    restart: always
+    networks:
+      - nginxnet
+    depends_on:
+      - node
+    ports:
+      - "8080:80"
+
+  node:
+    container_name: node
+    restart: always
+    build:
+      context: ./node
+    depends_on:
+      - db
+    networks:
+      - nginxnet
+
+  db:
+    build: 
+      context: ./mysql
+    container_name: db
+    restart: always
+    tty: true
+    networks:
+      - nginxnet
+    volumes:
+      - ./mysql/volume:/var/lib/mysql
+    environment:
+      - MYSQL_DATABASE=nodedb
+      - MYSQL_ROOT_PASSWORD=root
+  
+networks:
+  nginxnet:
+    driver: bridge
